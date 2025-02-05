@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero Kataa Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .cell {
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        .cell:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+        }
+        .game-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        @media (max-width: 640px) {
+            .game-board {
+                width: 300px;
+                height: 300px;
+            }
+            .cell {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="game-container p-8 rounded-2xl shadow-2xl">
+        <h1 class="text-5xl font-bold mb-8 text-white text-center">Zero-Kataa</h1>
+        
+        <div class="game-board w-[400px] h-[400px] grid grid-cols-3 gap-3 mb-8">
+            <div class="cell rounded-xl border-2 border-white/30 flex items-center justify-center text-5xl cursor-pointer text-white"></div>
+            <div class="cell rounded-xl border-2 border-white/30 flex items-center justify-center text-5xl cursor-pointer text-white"></div>
+            <div class="cell rounded-xl border-2 border-white/30 flex items-center justify-center text-5xl cursor-pointer text-white"></div>
+            <div class="cell rounded-xl border-2 border-white/30 flex items-center justify-center text-5xl cursor-pointer text-white"></div>
+            <div class="cell rounded-xl border-2 border-white/30 flex items-center justify-center text-5xl cursor-pointer text-white"></div>
+            <div class="cell rounded-xl border-2 border-white/30 flex items-center justify-center text-5xl cursor-pointer text-white"></div>
+            <div class="cell rounded-xl border-2 border-white/30 flex items-center justify-center text-5xl cursor-pointer text-white"></div>
+            <div class="cell rounded-xl border-2 border-white/30 flex items-center justify-center text-5xl cursor-pointer text-white"></div>
+            <div class="cell rounded-xl border-2 border-white/30 flex items-center justify-center text-5xl cursor-pointer text-white"></div>
+        </div>
+
+        <div class="score-board text-center text-white">
+            <h2 class="text-2xl font-bold mb-6">Score Board</h2>
+            <div class="flex items-center justify-center gap-12">
+                <div class="player-1 bg-white/10 p-4 rounded-xl">
+                    <p class="text-xl mb-2">Player X</p>
+                    <p class="text-3xl font-bold text-emerald-300" id="player1-score">0</p>
+                </div>
+                <div class="player-2 bg-white/10 p-4 rounded-xl">
+                    <p class="text-xl mb-2">Player O</p>
+                    <p class="text-3xl font-bold text-pink-300" id="player2-score">0</p>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="resetGame()" class="mt-8 w-full px-6 py-3 bg-white/20 text-white rounded-xl hover:bg-white/30 transition-colors font-semibold text-lg">
+            Reset Game
+        </button>
+    </div>
+
+    <script>
+        let currentPlayer = 'X';
+        let gameBoard = ['', '', '', '', '', '', '', '', ''];
+        let gameActive = true;
+        let scores = {
+            'X': 0,
+            'O': 0
+        };
+
+        const winningCombinations = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        const cells = document.querySelectorAll('.cell');
+        cells.forEach((cell, index) => {
+            cell.addEventListener('click', () => handleCellClick(index));
+        });
+
+        function handleCellClick(index) {
+            if (gameBoard[index] === '' && gameActive) {
+                gameBoard[index] = currentPlayer;
+                cells[index].textContent = currentPlayer;
+                cells[index].style.color = currentPlayer === 'X' ? '#6ee7b7' : '#f9a8d4';
+                
+                if (checkWin()) {
+                    scores[currentPlayer]++;
+                    updateScoreDisplay();
+                    gameActive = false;
+                    setTimeout(() => {
+                        alert(`Player ${currentPlayer} wins! 🎉`);
+                        resetBoard();
+                    }, 100);
+                } else if (gameBoard.every(cell => cell !== '')) {
+                    setTimeout(() => {
+                        alert("It's a draw! 🤝");
+                        resetBoard();
+                    }, 100);
+                } else {
+                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                }
+            }
+        }
+
+        function checkWin() {
+            return winningCombinations.some(combination => {
+                return combination.every(index => {
+                    return gameBoard[index] === currentPlayer;
+                });
+            });
+        }
+
+        function updateScoreDisplay() {
+            document.getElementById('player1-score').textContent = scores['X'];
+            document.getElementById('player2-score').textContent = scores['O'];
+        }
+
+        function resetBoard() {
+            gameBoard = ['', '', '', '', '', '', '', '', ''];
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.style.color = 'white';
+            });
+            gameActive = true;
+            currentPlayer = 'X';
+        }
+
+        function resetGame() {
+            scores = { 'X': 0, 'O': 0 };
+            updateScoreDisplay();
+            resetBoard();
+        }
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
